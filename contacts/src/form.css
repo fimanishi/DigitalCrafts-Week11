@@ -1,5 +1,25 @@
 .md-card {
-  margin: 20px auto;
+  margin: 20px auto 0;
   max-width: 600px;
   padding: 20px;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+li {
+  list-style-type: none;
+}
+
+.md-card.list:hover {
+  cursor: pointer;
+}
+
+.contact {
+  margin: 0 auto;
+  max-width: 600px;
 }

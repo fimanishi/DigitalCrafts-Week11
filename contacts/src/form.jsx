@@ -2,12 +2,17 @@ import React, { Component } from 'react';
 import {Card, CardActions, CardTitle, CardText} from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
+import "./form.css"
+import ContactsList from "./contactslist"
 
 class Form extends Component{
   constructor (props){
     super(props);
-    this.state = {person: {name: "", email: "", phone: "", address: "", city: "", state: "", zipcode: ""}, contacts: [],};
-  }
+    this.state = {person: {name: "", email: "", phone: "", address: "", city: "", state: "", zipcode: "", visible: false, id: 0},
+    contacts: [{name: "Felipe", email: "fimanishi@gmail.com", phone: "3375345424", address: "2525 S Voss Rd, apt 219", city: "Houston", state: "Texas", zipcode: "77057", visible: false, id: 1},
+  {name: "Lauren", email: "laurenrkim@gmail.com", phone: "3372819071", address: "2525 S Voss Rd, apt 219", city: "Houston", state: "Texas", zipcode: "77057", visible: false, id: 2}],};
+}
+
 
   update_state(event){
     // if (event.target.id === "phone"){
@@ -29,7 +34,14 @@ class Form extends Component{
     // else{
     let newAssignment = Object.assign({}, this.state.person);
     newAssignment[event.target.id] = event.target.value;
+    if (this.state.person.id === 0 && this.state.contacts.length > 0){
+      newAssignment["id"] = this.state.contacts[this.state.contacts.length-1].id + 1;
+    }
+    else if (this.state.person.id === 0){
+      newAssignment["id"] = 1;
+    }
     this.setState({person: newAssignment});
+
     // }
   }
 
@@ -52,10 +64,53 @@ class Form extends Component{
     event.preventDefault();
     var contactsUpdated = this.state.contacts.slice();
     contactsUpdated.push(this.state.person);
-    this.setState({contacts: contactsUpdated});
-    return(
-    <Results contacts={this.state.contacts} />
-    )
+
+    var ordered = [];
+    contactsUpdated.forEach(function(item){
+      var added = false;
+      if (ordered.length === 0){
+        ordered.push(item);
+        added = true;
+      }
+      else{
+        for(var i=0; i<ordered.length; i++){
+          if(item.name < ordered[i]["name"]){
+            ordered.splice(i, 0, item);
+            added = true;
+            break;
+          }
+        }
+      if(!added){
+        ordered.push(item);
+      }
+      }
+    })
+    this.setState({contacts: ordered});
+    return this.clear_fields()
+  }
+
+  clear_fields(){
+    var newAssignment = {name: "", email: "", phone: "", address: "", city: "", state: "", zipcode: "", visible: false, id: 0};
+    this.setState({person: newAssignment});
+
+  }
+
+  handle_click(event, index){
+    let newAssignment = this.state.contacts.slice();
+    newAssignment[index]["visible"] = !this.state.contacts[index]["visible"];
+    this.setState({contacts: newAssignment});
+  }
+
+  delete_click(event, id){
+    let newAssignment = this.state.contacts.slice();
+    for (var i = 0; i < this.state.contacts.length; i ++){
+      if (this.state.contacts[i].id === id){
+        break
+      }
+    }
+    newAssignment.splice(i,1);
+    this.setState({contacts: newAssignment})
+
   }
 
 
@@ -86,20 +141,20 @@ class Form extends Component{
           </Card>
         </form>
         <div id="results">
+            {this.state.contacts.length === 0 ? <div style={{textAlign: 'center',}}><h2>No contacts stored</h2></div> : this.state.contacts.map((p, index) =>
+              <div className="contact" key={p.id}>
+                <Card className="md-card list" onClick={event => this.handle_click(event, index)}>
+                  <ContactsList contact={p}/>
+                </Card>
+                <RaisedButton label="delete" primary={true} onClick={event => this.delete_click(event, p.id)}/>
+              </div>
+            )}
         </div>
       </div>
     )
   }
 }
 
-function Results(props) {
-  console.log("test");
-  return (
 
-    <ul>
-      <li>{props.contacts[0].name}</li>
-    </ul>
-  )
-}
 
 export default Form;
